@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        .animate-pulse-once {
+            animation: pulse 0.3s ease-in-out;
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50 h-screen flex flex-col">
+    <div class="flex-1 flex items-center justify-center px-4">
+        <div class="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden animate-slide-in">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+                <h1 class="text-3xl font-bold text-center">Password Generator</h1>
+                <p class="text-center mt-2 text-blue-100">Create and analyze secure passwords</p>
+            </div>
+            
+            <div class="p-6">
+                <!-- Generator Section -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-xl shadow-inner">
+                    <h2 class="text-lg font-semibold mb-4 text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                        </svg>
+                        Generator Settings
+                    </h2>
+                    
+                    <!-- Length -->
+                    <div class="mb-4">
+                        <label class="block mb-2 text-gray-700">Password Length: <span id="lengthDisplay" class="font-mono text-blue-600">12</span></label>
+                        <input type="range" id="passwordLength" min="8" max="30" value="12"
+                               class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    
+                    <!-- Character Types -->
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" id="uppercase" checked
+                                   class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                            <label for="uppercase" class="text-gray-700">Uppercase</label>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" id="lowercase" checked
+                                   class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                            <label for="lowercase" class="text-gray-700">Lowercase</label>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" id="numbers" checked
+                                   class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                            <label for="numbers" class="text-gray-700">Numbers</label>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" id="symbols" checked
+                                   class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                            <label for="symbols" class="text-gray-700">Symbols</label>
+                        </div>
+                    </div>
+                    
+                    <button id="generateBtn" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-all transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                        Generate Password
+                    </button>
+                </div>
+                
+                <!-- Password Display -->
+                <div class="mb-6">
+                    <div class="relative">
+                        <input type="text" id="password" placeholder="Enter or generate password"
+                               class="w-full p-3 pr-20 font-mono text-lg border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                        <button id="copyBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-1 rounded-lg transition-all">
+                            Copy
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Strength Indicator -->
+                <div class="bg-gray-50 p-4 rounded-xl shadow-inner">
+                    <h2 class="text-lg font-semibold mb-3 text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Password Strength
+                    </h2>
+                    <div id="strengthText" class="mb-2 font-semibold text-gray-700">Strength: Not calculated</div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-3 overflow-hidden">
+                        <div id="strengthBar" class="h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <div id="feedback" class="text-sm"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="py-4 text-center text-gray-600">
+        <div class="mb-2">Made with ❤️ by Aman Gupta</div>
+        <div class="flex justify-center space-x-4">
+            <a href="https://github.com/amangupta143" target="_blank" class="text-gray-600 hover:text-gray-900 transition-colors">
+                <i class="fab fa-github text-xl"></i>
+            </a>
+            <a href="https://linkedin.com/in/amangupta143" target="_blank" class="text-gray-600 hover:text-gray-900 transition-colors">
+                <i class="fab fa-linkedin text-xl"></i>
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const generateBtn = document.getElementById('generateBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const passwordInput = document.getElementById('password');
+            const lengthInput = document.getElementById('passwordLength');
+            const lengthDisplay = document.getElementById('lengthDisplay');
+            
+            lengthInput.addEventListener('input', function() {
+                lengthDisplay.textContent = this.value;
+            });
+            
+            function updateStrengthDisplay(strengthInfo) {
+                const strengthText = document.getElementById('strengthText');
+                const strengthBar = document.getElementById('strengthBar');
+                const feedback = document.getElementById('feedback');
+                
+                strengthText.textContent = `Strength: ${strengthInfo.strength}`;
+                strengthBar.style.width = `${strengthInfo.score}%`;
+                
+                // Update colors based on strength
+                let color;
+                switch(strengthInfo.strength) {
+                    case 'Very Strong': color = 'bg-green-500'; break;
+                    case 'Strong': color = 'bg-green-400'; break;
+                    case 'Moderate': color = 'bg-yellow-500'; break;
+                    case 'Weak': color = 'bg-red-400'; break;
+                    default: color = 'bg-red-500';
+                }
+                
+                strengthBar.className = `h-full rounded-full transition-all duration-500 ${color}`;
+                
+                if (strengthInfo.feedback.length > 0) {
+                    feedback.innerHTML = 'Suggestions to improve:<br>• ' + 
+                        strengthInfo.feedback.join('<br>• ');
+                    feedback.className = 'text-sm text-orange-500 mt-2';
+                } else {
+                    feedback.textContent = 'Great password! All criteria met.';
+                    feedback.className = 'text-sm text-green-500 mt-2';
+                }
+            }
+            
+            generateBtn.addEventListener('click', async function() {
+                generateBtn.classList.add('animate-pulse-once');
+                setTimeout(() => generateBtn.classList.remove('animate-pulse-once'), 300);
+                
+                const data = {
+                    length: parseInt(lengthInput.value),
+                    uppercase: document.getElementById('uppercase').checked,
+                    lowercase: document.getElementById('lowercase').checked,
+                    numbers: document.getElementById('numbers').checked,
+                    symbols: document.getElementById('symbols').checked
+                };
+                
+                try {
+                    const response = await fetch('/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        passwordInput.value = result.password;
+                        passwordInput.classList.add('animate-pulse-once');
+                        setTimeout(() => passwordInput.classList.remove('animate-pulse-once'), 300);
+                        updateStrengthDisplay(result.strength);
+                    } else {
+                        document.getElementById('feedback').textContent = result.error;
+                        document.getElementById('feedback').className = 'text-sm text-red-500 mt-2';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+            
+            copyBtn.addEventListener('click', function() {
+                passwordInput.select();
+                document.execCommand('copy');
+                
+                copyBtn.textContent = 'Copied!';
+                copyBtn.classList.add('bg-green-500', 'text-white');
+                
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.classList.remove('bg-green-500', 'text-white');
+                }, 2000);
+            });
+            
+            // Check password strength on input
+            let debounceTimer;
+            passwordInput.addEventListener('input', async function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(async () => {
+                    if (passwordInput.value) {
+                        try {
+                            const response = await fetch('/check', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ password: passwordInput.value })
+                            });
+                            
+                            const result = await response.json();
+                            updateStrengthDisplay(result);
+                        } catch (error) {
+                            console.error('Error:', error);
+                        }
+                    } else {
+                        document.getElementById('strengthText').textContent = 'Strength: Not calculated';
+                        document.getElementById('strengthBar').style.width = '0%';
+                        document.getElementById('feedback').textContent = '';
+                    }
+                }, 300);
+            });
+        });
+    </script>
+</body>
+</html>
